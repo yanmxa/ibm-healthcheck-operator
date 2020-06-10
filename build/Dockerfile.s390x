@@ -14,7 +14,13 @@
 # limitations under the License.
 #
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal@sha256:fc7fc7bc6b293fd2ec1c1b035acc6b97ba34f0700c5366b699c646d947c39f81
+FROM alpine:3.9 as builder
+
+RUN wget -O /qemu-s390x-static https://github.com/multiarch/qemu-user-static/releases/latest/download/qemu-s390x-static
+
+RUN chmod +x /qemu-s390x-static
+
+FROM registry.access.redhat.com/ubi8/ubi-minimal@sha256:7bb4dacb1e5fb5ad0742578d616982f836778fd0c5a0a00f843e9a7b1dabf487
 ARG VCS_REF
 ARG VCS_URL
 
@@ -34,8 +40,10 @@ ENV OPERATOR=/usr/local/bin/ibm-healthcheck-operator \
     USER_UID=1001 \
     USER_NAME=ibm-healthcheck-operator
 
+COPY --from=builder /qemu-s390x-static /usr/bin/
+
 # install operator binary
-COPY build/_output/bin/ibm-healthcheck-operator ${OPERATOR}
+COPY build/_output/bin/ibm-healthcheck-operator-s390x ${OPERATOR}
 
 COPY build/bin /usr/local/bin
 COPY manifests /manifests

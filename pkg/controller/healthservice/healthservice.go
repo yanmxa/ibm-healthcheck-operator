@@ -300,7 +300,7 @@ func (r *ReconcileHealthService) desiredHealthServiceDeployment(h *operatorv1alp
 							Resources: corev1.ResourceRequirements{
 								Limits: map[corev1.ResourceName]resource.Quantity{
 									corev1.ResourceCPU:    *cpu500,
-									corev1.ResourceMemory: *memory512,
+									corev1.ResourceMemory: *memory128,
 								},
 								Requests: map[corev1.ResourceName]resource.Quantity{
 									corev1.ResourceCPU:    *cpu50,

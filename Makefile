@@ -108,9 +108,8 @@ lint: lint-all
 # test section
 ############################################################
 
-test: ## Run unit test
-	@echo "Running the tests for $(IMAGE_NAME) on $(LOCAL_ARCH)..."
-	@go test $(TESTARGS) ./pkg/controller/...
+test:
+	@go test ${TESTARGS} ./...
 
 ############################################################
 # coverage section
@@ -123,10 +122,19 @@ coverage:
 # build section
 ############################################################
 
-build: 
-	@echo "Building the $(IMAGE_NAME) binary for $(LOCAL_ARCH)..."
-	@GOARCH=$(LOCAL_ARCH) common/scripts/gobuild.sh build/_output/bin/$(IMAGE_NAME) ./cmd/manager
-	@strip $(STRIP_FLAGS) build/_output/bin/$(IMAGE_NAME)
+build: build-amd64 build-ppc64le build-s390x
+
+build-amd64:
+	@echo "Building the ${IMAGE_NAME} amd64 binary..."
+	@GOARCH=amd64 common/scripts/gobuild.sh build/_output/bin/$(IMAGE_NAME) ./cmd/manager
+
+build-ppc64le:
+	@echo "Building the ${IMAGE_NAME} ppc64le binary..."
+	@GOARCH=ppc64le common/scripts/gobuild.sh build/_output/bin/$(IMAGE_NAME)-ppc64le ./cmd/manager
+
+build-s390x:
+	@echo "Building the ${IMAGE_NAME} s390x binary..."
+	@GOARCH=s390x common/scripts/gobuild.sh build/_output/bin/$(IMAGE_NAME)-s390x ./cmd/manager
 
 ############################################################
 # image section
@@ -136,23 +144,40 @@ ifeq ($(BUILD_LOCALLY),0)
     export CONFIG_DOCKER_TARGET = config-docker
 endif
 
-build-push-image: build-image push-image
+build-image: build-image-amd64 build-image-ppc64le build-image-s390x
 
-build-image: build
-	@echo "Building the $(IMAGE_NAME) docker image for $(LOCAL_ARCH)..."
-	@docker build -t $(IMAGE_REPO)/$(IMAGE_NAME)-$(LOCAL_ARCH):$(VERSION) -f build/Dockerfile .
+build-image-amd64: build-amd64
+	@docker build -t $(IMAGE_REPO)/$(IMAGE_NAME)-amd64:$(VERSION) -f build/Dockerfile .
 
-push-image: $(CONFIG_DOCKER_TARGET) build-image
-	@echo "Pushing the $(IMAGE_NAME) docker image for $(LOCAL_ARCH)..."
-	@docker push $(IMAGE_REPO)/$(IMAGE_NAME)-$(LOCAL_ARCH):$(VERSION)
+build-image-ppc64le: build-ppc64le
+	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
+	@docker build -t $(IMAGE_REPO)/$(IMAGE_NAME)-ppc64le:$(VERSION) -f build/Dockerfile.ppc64le .
+
+build-image-s390x: build-s390x
+	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
+	@docker build -t $(IMAGE_REPO)/$(IMAGE_NAME)-s390x:$(VERSION) -f build/Dockerfile.s390x .
+
+push-image-amd64: $(CONFIG_DOCKER_TARGET) build-image-amd64
+	@docker push $(IMAGE_REPO)/$(IMAGE_NAME)-amd64:$(VERSION)
+
+push-image-ppc64le: $(CONFIG_DOCKER_TARGET) build-image-ppc64le
+	@docker push $(IMAGE_REPO)/$(IMAGE_NAME)-ppc64le:$(VERSION)
+
+push-image-s390x: $(CONFIG_DOCKER_TARGET) build-image-s390x
+	@docker push $(IMAGE_REPO)/$(IMAGE_NAME)-s390x:$(VERSION)
 
 ############################################################
 # multiarch-image section
 ############################################################
 
-multiarch-image: $(CONFIG_DOCKER_TARGET)
-	@common/scripts/multiarch_image.sh $(IMAGE_REPO) $(IMAGE_NAME) $(VERSION)
-	
+images: push-image-amd64 push-image-ppc64le push-image-s390x multiarch-image
+
+multiarch-image:
+	@curl -L -o /tmp/manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.0/manifest-tool-linux-amd64
+	@chmod +x /tmp/manifest-tool
+	/tmp/manifest-tool push from-args --platforms linux/amd64,linux/ppc64le,linux/s390x --template $(IMAGE_REPO)/$(IMAGE_NAME)-ARCH:$(VERSION) --target $(IMAGE_REPO)/$(IMAGE_NAME) --ignore-missing
+	/tmp/manifest-tool push from-args --platforms linux/amd64,linux/ppc64le,linux/s390x --template $(IMAGE_REPO)/$(IMAGE_NAME)-ARCH:$(VERSION) --target $(IMAGE_REPO)/$(IMAGE_NAME):$(VERSION) --ignore-missing
+
 ############################################################
 # clean section
 ############################################################
