@@ -58,8 +58,10 @@ LAST_CSV_FILE=$(find "${LAST_CSV_DIR}" -type f -name '*.clusterserviceversion.ya
 NEW_CSV_FILE=$(find "${NEW_CSV_DIR}" -type f -name '*.clusterserviceversion.yaml' | head -1)
 
 echo "[INFO] Updating ${NEW_CRD_FILE}"
-add_labels=$(yq r "${LAST_CRD_FILE}" metadata.labels)
+add_labels=$(yq r "${LAST_CRD_FILE}" "metadata.labels")
 yq w -i "${NEW_CRD_FILE}" "metadata.labels" "${add_labels}"
+api_version=$(yq r "${LAST_CRD_FILE}" "apiVersion")
+yq w -i "${NEW_CRD_FILE}" "apiVersion" "${api_version}"
 
 echo "[INFO] Updating ${NEW_CSV_FILE}"
 spec_CRD=$(yq r "${LAST_CSV_FILE}" spec.customresourcedefinitions)
