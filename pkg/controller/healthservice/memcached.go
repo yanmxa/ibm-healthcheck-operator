@@ -160,6 +160,8 @@ func (r *ReconcileHealthService) desiredMemcachedDeployment(h *operatorv1alpha1.
 	reqLogger := log.WithValues("HealthService.Namespace", h.Namespace, "HealthService.Name", h.Name)
 	reqLogger.Info("Building Memcached Deployment", "Deployment.Namespace", h.Namespace, "Deployment.Name", memName)
 
+	hsResources, _ := r.desiredResources(&h.Spec.Memcached.Resources)
+
 	dep := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      memName,
@@ -211,11 +213,11 @@ func (r *ReconcileHealthService) desiredMemcachedDeployment(h *operatorv1alpha1.
 						},
 						Resources: corev1.ResourceRequirements{
 							Limits: map[corev1.ResourceName]resource.Quantity{
-								corev1.ResourceCPU:    *cpu500,
-								corev1.ResourceMemory: *memory512},
+								corev1.ResourceCPU:    *hsResources.limitsCpu,
+								corev1.ResourceMemory: *hsResources.limitsMemory},
 							Requests: map[corev1.ResourceName]resource.Quantity{
-								corev1.ResourceCPU:    *cpu50,
-								corev1.ResourceMemory: *memory64},
+								corev1.ResourceCPU:    *hsResources.requestsCpu,
+								corev1.ResourceMemory: *hsResources.requestsMemory},
 						},
 					}},
 					NodeSelector: h.Spec.Memcached.NodeSelector,

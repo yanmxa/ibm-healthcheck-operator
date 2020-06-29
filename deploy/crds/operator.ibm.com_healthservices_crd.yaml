@@ -67,6 +67,26 @@ spec:
                   - repository
                   - tag
                   type: object
+                resources:
+                  description: resources define the desired state of resources
+                  properties:
+                    requests:
+                      description: requests define the desired state of requests memory and cpu 
+                      properties:
+                        memory:
+                          type: string
+                        cpu:
+                          type: string
+                      type: object
+                    limits:
+                      description: limits define the desired state of limits memory and cpu
+                      properties:
+                        memory:
+                          type: string
+                        cpu:
+                          type: string
+                      type: object
+                  type: objcet
                 name:
                   description: health service deployment name
                   type: string
@@ -279,6 +299,26 @@ spec:
                   - repository
                   - tag
                   type: object
+                resources:
+                  description: resources define the desired state of resources
+                  properties:
+                    requests:
+                      description: requests define the desired state of requests memory and cpu 
+                      properties:
+                        memory:
+                          type: string
+                        cpu:
+                          type: string
+                      type: object
+                    limits:
+                      description: limits define the desired state of limits memory and cpu
+                      properties:
+                        memory:
+                          type: string
+                        cpu:
+                          type: string
+                      type: object
+                  type: objcet
                 name:
                   description: memcached deployment name
                   type: string
@@ -461,6 +501,7 @@ spec:
               required:
               - name
               type: object
+
           type: object
         status:
           description: HealthServiceStatus defines the observed state of HealthService
