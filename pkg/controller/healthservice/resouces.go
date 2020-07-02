@@ -17,6 +17,7 @@
 package healthservice
 
 import (
+	"regexp"
 	"strconv"
 
 	"github.com/IBM/ibm-healthcheck-operator/pkg/apis/operator/v1alpha1"
@@ -44,25 +45,25 @@ func (r *ReconcileHealthService) desiredResources(res *v1alpha1.Resources) (*Hea
 		limitsCpu     *resource.Quantity
 		limitsMemory  *resource.Quantity
 	)
-	if reqCpu, err := strconv.ParseInt(res.Requests.Cpu, 10, 64); err != nil {
+	if reqCpu, err := GetDigits(res.Requests.Cpu); err != nil {
 		return defaultResources, err
 	} else {
 		requestCpu = resource.NewMilliQuantity(reqCpu, resource.DecimalSI)
 	}
 
-	if reqMemory, err := strconv.ParseInt(res.Requests.Memory, 10, 64); err != nil {
+	if reqMemory, err := GetDigits(res.Requests.Memory); err != nil {
 		return defaultResources, err
 	} else {
 		requestMemory = resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 	}
 
-	if limCpu, err := strconv.ParseInt(res.Limits.Cpu, 10, 64); err != nil {
+	if limCpu, err := GetDigits(res.Limits.Cpu); err != nil {
 		return defaultResources, err
 	} else {
 		limitsCpu = resource.NewMilliQuantity(limCpu, resource.DecimalSI)
 	}
 
-	if limMemory, err := strconv.ParseInt(res.Limits.Memory, 10, 64); err != nil {
+	if limMemory, err := GetDigits(res.Limits.Memory); err != nil {
 		return defaultResources, err
 	} else {
 		limitsMemory = resource.NewQuantity(limMemory*1024*1024, resource.BinarySI)
@@ -74,4 +75,12 @@ func (r *ReconcileHealthService) desiredResources(res *v1alpha1.Resources) (*Hea
 		limitsCpu:      limitsCpu,
 		limitsMemory:   limitsMemory,
 	}, nil
+}
+
+var digitsRegexp = regexp.MustCompile("([0-9]*)")
+
+func GetDigits(s string) (int64, error) {
+	strDigits := digitsRegexp.FindStringSubmatch(s)[1]
+	digits, err := strconv.ParseInt(strDigits, 10, 64)
+	return digits, err
 }

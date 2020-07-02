@@ -87,13 +87,13 @@ type HealthServiceSpecHealthService struct {
 }
 
 type Resource struct {
-	Memory string `json:memory,omitempty`
-	Cpu    string `json:cpu,omitempty`
+	Memory string `json:"memory,omitempty"`
+	Cpu    string `json:"cpu,omitempty"`
 }
 
 type Resources struct {
-	Requests Resource `json:"requests,omitempty`
-	Limits   Resource `json:"limits,omitempty`
+	Requests Resource `json:"requests,omitempty"`
+	Limits   Resource `json:"limits,omitempty"`
 }
 
 // HealthServiceSpec defines the desired state of HealthService

@@ -231,19 +231,13 @@ func (r *ReconcileHealthService) desiredHealthServiceDeployment(h *operatorv1alp
 		serviceAccountName = h.Spec.Memcached.ServiceAccountName
 	}
 
-	// requestsCpu := h.Spec.HealthService.Resources.Requests.Cpu
-	// requestsCpu := h.Spec.HealthService.Resources
-	// if val, err := strconv.ParseInt(requestsCpu, 10, 64); err == nil {
-	// 	requestsCpuDefault = resource.NewMilliQuantity(50, resource.DecimalSI)
-	// }
-	// limitsCpu := h.Spec.HealthService.Resources.Limits.Cpu
-	// requestsMemory := h.Spec.HealthService.Resources.Requests.Memory
-	// limitsMemory := h.Spec.HealthService.Resources.Limits.Memory
-
-	hsResources, _ := r.desiredResources(&h.Spec.HealthService.Resources)
-
 	reqLogger := log.WithValues("HealthService.Namespace", h.Namespace, "HealthService.Name", h.Name)
 	reqLogger.Info("Building HealthService Deployment", "Deployment.Namespace", h.Namespace, "Deployment.Name", hsName)
+
+	hsResources, err := r.desiredResources(&h.Spec.HealthService.Resources)
+	if err != nil {
+		reqLogger.Error(err, "Failed to get healtservice.Spec.HealthService resources")
+	}
 
 	dep := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

@@ -160,7 +160,10 @@ func (r *ReconcileHealthService) desiredMemcachedDeployment(h *operatorv1alpha1.
 	reqLogger := log.WithValues("HealthService.Namespace", h.Namespace, "HealthService.Name", h.Name)
 	reqLogger.Info("Building Memcached Deployment", "Deployment.Namespace", h.Namespace, "Deployment.Name", memName)
 
-	hsResources, _ := r.desiredResources(&h.Spec.Memcached.Resources)
+	hsResources, err := r.desiredResources(&h.Spec.Memcached.Resources)
+	if err != nil {
+		reqLogger.Error(err, "Failed to get healtservice.Spec.Memcached resources")
+	}
 
 	dep := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

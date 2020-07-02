@@ -25,6 +25,16 @@ metadata:
                 "node-role.kubernetes.io/worker": ""
               },
               "replicaCount": 1,
+              "resources": {
+                "limits": {
+                  "cpu": "400",
+                  "memory": "70Mi"
+                },
+                "requests": {
+                  "cpu": "200m",
+                  "memory": "60Mi"
+                }
+              },
               "securityContext": {
                 "allowPrivilegeEscalation": false,
                 "capabilities": {
@@ -62,6 +72,16 @@ metadata:
                 "node-role.kubernetes.io/worker": ""
               },
               "replicaCount": 1,
+              "resources": {
+                "limits": {
+                  "cpu": "500",
+                  "memory": "60Mi"
+                },
+                "requests": {
+                  "cpu": "200m",
+                  "memory": "60Mi"
+                }
+              },
               "securityContext": {
                 "allowPrivilegeEscalation": false,
                 "capabilities": {
@@ -90,7 +110,7 @@ metadata:
     capabilities: Basic Install
     categories: Monitoring
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-healthcheck-operator:latest
+    containerImage: quay.io/yanmeng/ibm-healthcheck-operater:3.7.0
     createdAt: "2020-06-02"
     description: You can use the ibm-healthcheck-operator to install the IBM System Healthcheck service. You can use IBM System Healthcheck service to check the service status of the IBM Cloud Paks and IBM Cloud Platform Common Services.
     repository: https://github.com/IBM/ibm-healthcheck-operator
@@ -230,7 +250,7 @@ spec:
                   value: "quay.io/opencloudio/system-healthcheck-service@sha256:c8651a331bed66ce33a16085d277483e77d57f0d705449e2764c9ea39c8e85f9"
                 - name: OPERAND_MEMCACHED_IMAGE
                   value: "quay.io/opencloudio/icp-memcached@sha256:8de5389dc4712a1383c55dd5ed20585b6a56747b4e67fd72761546d28b63b30b"
-                image: quay.io/opencloudio/ibm-healthcheck-operator:latest
+                image: quay.io/yanmeng/ibm-healthcheck-operater:3.7.0
                 imagePullPolicy: Always
                 name: ibm-healthcheck-operator
                 resources:
